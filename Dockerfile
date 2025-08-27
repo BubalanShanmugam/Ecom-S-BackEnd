@@ -1,8 +1,10 @@
 # ---- Build Stage ----
-FROM gradle:7.6-jdk17 AS build
+FROM openjdk:17-jdk-slim AS build
 WORKDIR /app
 COPY . .
-RUN gradle clean build -x test
+# Make gradlew executable (important step!)
+RUN chmod +x ./gradlew
+RUN ./gradlew clean build -x test
 
 # ---- Run Stage ----
 FROM openjdk:17-jdk-slim
