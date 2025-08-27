@@ -1,15 +1,17 @@
-# Use OpenJDK image
-FROM openjdk:17-jdk-slim
-
-# Set working directory
+# ---- Build Stage ----
+FROM gradle:7.6-jdk17 AS build
 WORKDIR /app
-
-# Copy source code
 COPY . .
+RUN gradle clean build -x test
 
-# Build the jar
-RUN ./gradlew build
+# ---- Run Stage ----
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+# Copy only the built jar from build stage
+COPY --from=build /app/build/libs/*.jar app.jar
 
-# Run the jar
-CMD ["java", "-jar", "e-commerce-0.0.1-SNAPSHOT.jar"]
+# Expose port 8080 (Spring Boot default)
+EXPOSE 8080
 
+# Run the application
+ENTRYPOINT ["java","-jar","app.jar"]
