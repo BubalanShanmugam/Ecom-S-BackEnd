@@ -2,15 +2,10 @@ FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 
-COPY gradlew .
-COPY gradle gradle
-COPY build.gradle .
-COPY settings.gradle .
-COPY src src
+COPY . .
 
-RUN chmod +x gradlew
-RUN ./gradlew build -x test
+RUN chmod +x ./gradlew
 
-EXPOSE 8080
+RUN ./gradlew clean build -x test
 
-CMD ["java", "-Dserver.port=$PORT", "-jar", "build/libs/*.jar"]
+CMD ["sh", "-c", "java -Dserver.port=$PORT -jar build/libs/*.jar"]
