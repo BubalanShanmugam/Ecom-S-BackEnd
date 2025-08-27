@@ -1,15 +1,16 @@
-# ---- Build Stage ----
-FROM openjdk:17-jdk-slim AS build
-WORKDIR /app
-COPY . .
-# Make gradlew executable (important step!)
-RUN chmod +x ./gradlew
-RUN ./gradlew clean build -x test
-
-# ---- Run Stage ----
 FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY --from=build /app/build/libs/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
 
+WORKDIR /app
+
+COPY gradlew .
+COPY gradle gradle
+COPY build.gradle .
+COPY settings.gradle .
+COPY src src
+
+RUN chmod +x gradlew
+RUN ./gradlew build -x test
+
+EXPOSE 8080
+
+CMD ["java", "-Dserver.port=$PORT", "-jar", "build/libs/*.jar"]
