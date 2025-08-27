@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Build the jar
-RUN ./mvnw clean package -DskipTests
+RUN ../gradlew build
 
 # Run the jar
-CMD ["java", "-jar", "target/myapp-0.0.1-SNAPSHOT.jar"]
+CMD ["java", "-jar", "e-commerce-0.0.1-SNAPSHOT.jar"]
