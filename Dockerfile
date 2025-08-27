@@ -8,7 +8,8 @@ WORKDIR /app
 COPY . .
 
 # Build the jar
-RUN ../gradlew build
+RUN ./gradlew build
 
 # Run the jar
 CMD ["java", "-jar", "e-commerce-0.0.1-SNAPSHOT.jar"]
+
