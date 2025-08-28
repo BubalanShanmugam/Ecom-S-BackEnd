@@ -19,6 +19,10 @@ COPY e_commerce ./e_commerce
 # Build Spring Boot jar (skip tests)
 RUN ./gradlew bootJar -x test --no-daemon
 
+
+# Make gradlew executable inside container
+RUN chmod +x ./gradlew
+
 # ------------ Run Stage ------------
 FROM openjdk:17-jdk-slim
 
@@ -32,3 +36,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 ENTRYPOINT ["java","-jar","app.jar"]
+
