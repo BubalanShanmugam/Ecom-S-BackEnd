@@ -3,6 +3,9 @@ FROM gradle:8.6-jdk17 AS builder
 
 WORKDIR /app
 
+# Make gradlew executable inside container
+RUN chmod +x ./gradlew
+
 # Copy settings.gradle from root
 COPY settings.gradle ./
 
@@ -20,9 +23,6 @@ COPY e_commerce ./e_commerce
 RUN ./gradlew bootJar -x test --no-daemon
 
 
-# Make gradlew executable inside container
-RUN chmod +x ./gradlew
-
 # ------------ Run Stage ------------
 FROM openjdk:17-jdk-slim
 
@@ -36,4 +36,5 @@ ENV PORT=8080
 EXPOSE 8080
 
 ENTRYPOINT ["java","-jar","app.jar"]
+
 
