@@ -9,7 +9,7 @@ COPY . .
 
 # Make gradlew executable and build
 RUN chmod +x ./gradlew
-RUN ./gradlew clean build -x test --no-daemon
+RUN ./gradlew build -x test --no-daemon
 
 # Run stage
 FROM openjdk:17-jdk-slim
@@ -24,3 +24,4 @@ EXPOSE 8080
 
 # Run the application
 CMD ["java", "-jar", "app.jar"]
+
