@@ -1,25 +1,31 @@
 # ------------ Build Stage ------------
-FROM gradle:7.6-jdk17 AS builder
+FROM gradle:8.6-jdk17 AS builder
+
 WORKDIR /app
 
-# Copy project
+# Copy Gradle wrapper and build files first (for caching)
+COPY build.gradle settings.gradle gradlew* ./
+COPY gradle ./gradle
+
+# Download dependencies (cache layer)
+RUN ./gradlew dependencies --no-daemon || true
+
+# Copy full source code
 COPY . .
 
-# Make gradlew executable
-RUN chmod +x ./gradlew
-
-# Build the Spring Boot module directly (replace 'backend' with your module name)
-RUN ./gradlew :backend:bootJar -x test --no-daemon
+# Build Spring Boot jar (skip tests)
+RUN ./gradlew bootJar -x test --no-daemon
 
 # ------------ Run Stage ------------
 FROM openjdk:17-jdk-slim
+
 WORKDIR /app
 
-# Copy the built JAR from builder stage
-COPY --from=builder /app/backend/build/libs/*.jar app.jar
+# Copy only the jar file from builder stage
+COPY --from=builder /app/build/libs/*.jar app.jar
 
-# Expose default Spring Boot port
+# Render requires a dynamic port ($PORT)
+ENV PORT=8080
 EXPOSE 8080
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
