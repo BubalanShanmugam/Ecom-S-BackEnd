@@ -1,27 +1,27 @@
-# Build stage
+# ------------ Build Stage ------------
 FROM gradle:7.6-jdk17 AS builder
-
-# Set working directory
 WORKDIR /app
 
-# Copy the entire project
+# Copy project
 COPY . .
 
-# Make gradlew executable and build
+# Make gradlew executable
 RUN chmod +x ./gradlew
-RUN ./gradlew build -x test --no-daemon
 
-# Run stage
+# Detect Spring Boot module and build
+RUN MODULE=$(./gradlew tasks --all | grep bootJar | awk '{print $1}' | head -n1 | sed 's/:bootJar//') \
+    && echo "Building module: $MODULE" \
+    && ./gradlew ":$MODULE:bootJar" -x test --no-daemon
+
+# ------------ Run Stage ------------
 FROM openjdk:17-jdk-slim
-
 WORKDIR /app
 
-# Copy the built JAR from builder stage
-COPY --from=builder /app/build/libs/*.jar app.jar
+# Copy JAR from builder stage
+COPY --from=builder /app/*/build/libs/*.jar app.jar
 
-# Expose port
+# Expose default Spring Boot port
 EXPOSE 8080
 
 # Run the application
-CMD ["java", "-jar", "app.jar"]
-
+ENTRYPOINT ["java", "-jar", "app.jar"]
